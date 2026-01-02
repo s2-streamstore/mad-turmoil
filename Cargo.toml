@@ -2,7 +2,7 @@
 name = "mad-turmoil"
 version = "0.2.0"
 edition = "2024"
-license = "Apache-2.0"
+license = "MIT"
 description = "madsim-inspired determinism for turmoil-based simulation tests"
 
 [dependencies]
