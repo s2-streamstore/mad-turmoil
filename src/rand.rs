@@ -7,7 +7,7 @@ use std::{
     sync::{Arc, Mutex, MutexGuard, OnceLock},
 };
 
-use rand::{RngCore, rngs::StdRng};
+use rand::{Rng, rngs::StdRng};
 
 static RNG_CELL: OnceLock<Arc<Mutex<StdRng>>> = OnceLock::new();
 

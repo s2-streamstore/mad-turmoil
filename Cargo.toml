@@ -7,6 +7,6 @@ description = "madsim-inspired determinism for turmoil-based simulation tests"
 
 [dependencies]
 libc = "0.2"
-rand = "0.9"
+rand = "0.10"
 tokio = "1"
 turmoil = "0.7"
