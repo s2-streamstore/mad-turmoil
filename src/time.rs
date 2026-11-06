@@ -1,7 +1,7 @@
 //! Derived from <https://github.com/madsim-rs/madsim/blob/main/madsim/src/sim/time/system_time.rs>
 
 use std::{
-    sync::atomic::{AtomicBool, Ordering},
+    sync::atomic::{AtomicBool, AtomicPtr, Ordering},
     time::Duration,
 };
 
@@ -56,14 +56,40 @@ unsafe fn tokio_instant_now() -> libc::timespec {
     ts.into()
 }
 
+unsafe fn real_clock_gettime(
+    clockid: libc::clockid_t,
+    tp: *mut libc::timespec,
+) -> Option<libc::c_int> {
+    type ClockGettime = unsafe extern "C" fn(libc::clockid_t, *mut libc::timespec) -> libc::c_int;
+    static REAL: AtomicPtr<libc::c_void> = AtomicPtr::new(std::ptr::null_mut());
+
+    let mut real = REAL.load(Ordering::Relaxed);
+    if real.is_null() {
+        real = unsafe { libc::dlsym(libc::RTLD_NEXT, c"clock_gettime".as_ptr()) };
+        if real.is_null() {
+            return None;
+        }
+        REAL.store(real, Ordering::Relaxed);
+    }
+    let real: ClockGettime = unsafe { std::mem::transmute(real) };
+    Some(unsafe { real(clockid, tp) })
+}
+
 #[unsafe(no_mangle)]
 #[inline(never)]
 unsafe extern "C" fn clock_gettime(
     clockid: libc::clockid_t,
     tp: *mut libc::timespec,
 ) -> libc::c_int {
+    let use_sim_clocks = USE_SIM_CLOCKS.load(Ordering::Acquire);
+    if !use_sim_clocks {
+        if let Some(ret) = unsafe { real_clock_gettime(clockid, tp) } {
+            return ret;
+        }
+    }
+
     // <https://man7.org/linux/man-pages/man3/clock_gettime.3.html>
-    if USE_SIM_CLOCKS.load(Ordering::Acquire) && tokio::runtime::Handle::try_current().is_ok() {
+    if use_sim_clocks && tokio::runtime::Handle::try_current().is_ok() {
         let timespec = match clockid {
             libc::CLOCK_REALTIME => Some(turmoil_since_epoch()),
             #[cfg(target_os = "linux")]

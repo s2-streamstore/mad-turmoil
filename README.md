@@ -39,3 +39,11 @@ let sim = turmoil::Builder::new()
     .epoch(SystemTime::UNIX_EPOCH + Duration::from_secs(1_750_000_000))
     .build();
 ```
+
+Clocks are only overridden while a `SimClocksGuard` is alive; outside of it, `clock_gettime` behaves normally.
+
+## Tokio's `parking_lot` feature
+
+Avoid enabling tokio's `parking_lot` feature (which `full` also enables) in simulation builds.
+With it, tokio's clock sits behind a `parking_lot` mutex whose contended slow path reads the clock while holding internal locks, which can deadlock once anything touches the runtime from another thread, e.g. `spawn_blocking`.
+Check with `cargo tree -e features -i tokio | grep parking_lot`.
