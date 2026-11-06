@@ -110,7 +110,7 @@ checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
 
 [[package]]
 name = "mad-turmoil"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "getrandom 0.4.3",
  "libc",
