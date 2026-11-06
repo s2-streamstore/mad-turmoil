@@ -2,8 +2,12 @@
 name = "mad-turmoil"
 version = "0.2.1"
 edition = "2024"
+rust-version = "1.85"
 license = "MIT"
 description = "madsim-inspired determinism for turmoil-based simulation tests"
+repository = "https://github.com/s2-streamstore/mad-turmoil"
+keywords = ["simulation", "deterministic", "testing", "turmoil", "dst"]
+categories = ["development-tools::testing", "simulation"]
 
 [dependencies]
 libc = "0.2"
