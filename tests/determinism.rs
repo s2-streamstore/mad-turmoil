@@ -13,14 +13,19 @@ fn main() {
         Ok(seed) => simulate(seed.parse().expect("seed")),
         Err(_) => {
             let first = observe(1);
+            assert!(!first.is_empty());
             assert_eq!(first, observe(1), "same seed must reproduce");
-            assert_ne!(first, observe(2), "different seeds must diverge");
+            let second = observe(2);
+            assert_eq!(first.len(), second.len());
+            for (a, b) in first.iter().zip(&second) {
+                assert_ne!(a, b, "different seeds must diverge");
+            }
             println!("determinism: ok");
         }
     }
 }
 
-fn observe(seed: u64) -> String {
+fn observe(seed: u64) -> Vec<String> {
     let out = Command::new(std::env::current_exe().expect("current exe"))
         .env(SEED_VAR, seed.to_string())
         .output()
@@ -30,7 +35,11 @@ fn observe(seed: u64) -> String {
         "seed {seed} failed:\n{}",
         String::from_utf8_lossy(&out.stderr)
     );
-    String::from_utf8(out.stdout).expect("utf8")
+    String::from_utf8(out.stdout)
+        .expect("utf8")
+        .lines()
+        .map(String::from)
+        .collect()
 }
 
 fn simulate(seed: u64) {
