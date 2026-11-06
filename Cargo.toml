@@ -10,3 +10,10 @@ libc = "0.2"
 rand = "0.10"
 tokio = "1"
 turmoil = "0.7.1"
+
+[dev-dependencies]
+getrandom = "0.4"
+
+[[test]]
+name = "determinism"
+harness = false
