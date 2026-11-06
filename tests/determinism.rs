@@ -9,6 +9,7 @@ use rand::{SeedableRng, rngs::StdRng};
 const SEED_VAR: &str = "MAD_TURMOIL_TEST_SEED";
 
 fn main() {
+    assert_real_clocks();
     match std::env::var(SEED_VAR) {
         Ok(seed) => simulate(seed.parse().expect("seed")),
         Err(_) => {
@@ -42,9 +43,19 @@ fn observe(seed: u64) -> Vec<String> {
         .collect()
 }
 
+fn assert_real_clocks() {
+    let since_epoch = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .expect("after epoch");
+    assert!(since_epoch > Duration::from_secs(1_700_000_000));
+    let start = Instant::now();
+    std::thread::sleep(Duration::from_millis(5));
+    assert!(start.elapsed() >= Duration::from_millis(5));
+}
+
 fn simulate(seed: u64) {
     mad_turmoil::rand::set_rng(StdRng::seed_from_u64(seed));
-    let _guard = mad_turmoil::time::SimClocksGuard::init();
+    let guard = mad_turmoil::time::SimClocksGuard::init();
 
     let mut bytes = [0u8; 16];
     getrandom::fill(&mut bytes).expect("getrandom");
@@ -66,4 +77,7 @@ fn simulate(seed: u64) {
         Ok(())
     });
     sim.run().expect("sim");
+
+    drop(guard);
+    assert_real_clocks();
 }
