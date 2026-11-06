@@ -42,11 +42,11 @@ impl From<StdTimespec> for libc::timespec {
     }
 }
 
-fn turmoil_elapsed() -> libc::timespec {
-    let elapsed = turmoil::sim_elapsed().unwrap_or(Duration::ZERO);
+fn turmoil_since_epoch() -> libc::timespec {
+    let since_epoch = turmoil::since_epoch().unwrap_or(Duration::ZERO);
     libc::timespec {
-        tv_sec: elapsed.as_secs() as i64,
-        tv_nsec: elapsed.subsec_nanos() as libc::c_long,
+        tv_sec: since_epoch.as_secs() as i64,
+        tv_nsec: since_epoch.subsec_nanos() as libc::c_long,
     }
 }
 
@@ -65,9 +65,9 @@ unsafe extern "C" fn clock_gettime(
     // <https://man7.org/linux/man-pages/man3/clock_gettime.3.html>
     if USE_SIM_CLOCKS.load(Ordering::Acquire) && tokio::runtime::Handle::try_current().is_ok() {
         let timespec = match clockid {
-            libc::CLOCK_REALTIME => Some(turmoil_elapsed()),
+            libc::CLOCK_REALTIME => Some(turmoil_since_epoch()),
             #[cfg(target_os = "linux")]
-            libc::CLOCK_REALTIME_COARSE => Some(turmoil_elapsed()),
+            libc::CLOCK_REALTIME_COARSE => Some(turmoil_since_epoch()),
             libc::CLOCK_MONOTONIC | libc::CLOCK_MONOTONIC_RAW => {
                 Some(unsafe { tokio_instant_now() })
             }

@@ -1,12 +1,23 @@
 [package]
 name = "mad-turmoil"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
+rust-version = "1.85"
 license = "MIT"
 description = "madsim-inspired determinism for turmoil-based simulation tests"
+repository = "https://github.com/s2-streamstore/mad-turmoil"
+keywords = ["simulation", "deterministic", "testing", "turmoil", "dst"]
+categories = ["development-tools::testing", "simulation"]
 
 [dependencies]
 libc = "0.2"
 rand = "0.10"
 tokio = "1"
-turmoil = "0.7"
+turmoil = "0.7.1"
+
+[dev-dependencies]
+getrandom = "0.4"
+
+[[test]]
+name = "determinism"
+harness = false

@@ -28,3 +28,14 @@ fn main() -> eyre::Result<()> {
     // Go forth and create turmoil...
 }
 ```
+
+## Wall-clock time
+
+Inside a simulation, `SystemTime::now()` returns turmoil's logical time since its configured epoch.
+turmoil defaults the epoch to `SystemTime::now()` at builder creation, which mad-turmoil pins to the Unix epoch, so you may want to set a realistic one:
+
+```rust
+let sim = turmoil::Builder::new()
+    .epoch(SystemTime::UNIX_EPOCH + Duration::from_secs(1_750_000_000))
+    .build();
+```
